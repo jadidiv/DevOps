@@ -1,0 +1,45 @@
+version: '3.6'
+
+volumes:
+  html:
+  conf:
+  db:
+
+services:
+  wordpress:
+    #image: wordpress:5.9.1-php7.4-apache
+    image: wordpress:6.2.2
+    container_name: wordpress
+    restart: always
+    ports:
+      - 8091:80
+    environment:
+       - WORDPRESS_DB_HOST=db
+       - WORDPRESS_DB_USER=root
+       - WORDPRESS_DB_PASSWORD=rOOt!dbMys402
+       - WORDPRESS_DB_NAME=wpdb
+    volumes:
+      - html:/var/www/html
+      - conf:/usr/local/etc/php/conf.d-/
+      #- ./lib:/usr/local/lib/php/extensions/no-debug-non-zts-20190902
+
+  db:
+    #image: mysql:5.7
+    image: mysql:8.0.23
+    container_name: wp-mysql
+    #image: mysql:8.0.34
+    #command: --character-set-server=utf8mb4 --collation-server=utf8mb4_bin
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_bin
+    restart: always
+    environment:
+       - MYSQL_ROOT_PASSWORD=rOOt!dbMys402
+       - MYSQL_DATABASE=wpdb
+    volumes:
+      - db:/var/lib/mysql
+
+  adminer-mysql-php:
+    image: adminer:4.8.1
+    container_name: wp-mysql-adminer
+    restart: always
+    ports:
+      - 84:8080
