@@ -1,22 +1,46 @@
-version: '3.6'
+# docker-compose.yml
+version: '3.7'
 
 volumes:
-  gitlab-config:
-  gitlab-logs:
-  gitlab-data:
+  config:
+  logs:
+  data:
+  runner:
 
 services:
-  gitlab:
-    image: 'gitlab/gitlab-ce:latest'
-    container_name: gitlab
+  web:
+    image: gitlab/gitlab-ce:nightly
     restart: always
-    hostname: 'gitlab.ncbs.local'
+    hostname: localhost
+    container_name: gitlab-ce
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://localhost'
     ports:
-      - '80:80'
-      - '443:443'
-      - '23:22'
+      - '8080:80'
+      - '8443:443'
     volumes:
-      - gitlab-config:/etc/gitlab
-      - gitlab-logs:/var/log/gitlab
-      - gitlab-data:/var/opt/gitlab
-    shm_size: '256m'
+      - config:/etc/gitlab
+      - logs:/var/log/gitlab
+      - data:/var/opt/gitlab
+    networks:
+      - gitlab
+  gitlab-runner:
+    image: gitlab/gitlab-runner:alpine
+    container_name: gitlab-runner    
+    restart: always
+    depends_on:
+      - web
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - runner:/etc/gitlab-runner
+    networks:
+      - gitlab
+
+networks:
+  gitlab:
+    name: gitlab-network
+
+# To log in to GitLab for the first time, you need a temporary password, which is generated automatically during installation. We get the password using the command:
+# http://localhost:8080/
+# docker exec -it gitlab-ce grep 'Password:' /etc/gitlab/initial_root_password
