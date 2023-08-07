@@ -1,0 +1,125 @@
+ls
+# Inside a folder you can list all the files that the folder
+$ ls /bin
+
+cd
+#Once you have a folder, you can move into it using the cd command. cd means change directory.
+#You invoke it specifying a folder to move into. You can specify a folder name, or an entire path.
+$ cd /var/lib/docker
+$ cd .. # back to the home folder
+
+pwd
+# Whenever you feel lost in the filesystem, call the pwd command to know where you are
+$ pwd
+
+mkdir
+# You create folders using the mkdir command:
+$ mkdir fruits
+$ mkdir dogs cars # You can create multiple folders with one command
+$ mkdir -p fruits/apples # You can also create multiple nested folders by adding the -p option
+
+rmdir
+# you can delete a folder using rmdir. The folder you delete must be empty.
+$ rmdir fruits
+
+rm
+# To delete folders with files in them, we'll use the more generic rm command which deletes files and folders, using the -rf options
+$ rm -rf fruits cars # Be careful as this command does not ask for confirmation and it will immediately remove anything you ask it to remove.
+
+mv
+# Once you have a file, you can move it around using the mv command. Youspecify the file current path, and its new path
+$ mv pear new_pear
+$ mv pear apple fruits # pear and apple moved to the fruits folder
+
+cp
+# You can copy a file using the cp command
+$ cp apple another_apple
+$ cp -r fruits cars # To copy folders you need to add the -r option to recursively copy the whole folder contents
+
+touch
+# You can create an empty file using the touch command
+$ touch apple
+
+find
+# The find command can be used to find files or folders matching a particular search pattern
+$ find . -name '*.js' # Find all the files under the current tree that have the .js extension and print the relative path of each file matching
+$ find . -type d -name src # Find directories under the current tree matching the name "src"
+$ find . -type d -name node_modules -or -name public  # Find directories under the current tree matching the name "node_modules" or 'public'
+$ find . -type d -name '*.md' -not -path 'node_modules/*' # You can also exclude a path, using -not -path
+$ find . -type f -size +100c # You can search files that have more than 100 characters (bytes) in them
+$ find . -type f -size +100k -size -1M # Search files bigger than 100KB but smaller than 1MB
+$ find . -type f -mtime +3 # Search files edited more than 3 days ago
+$ find . -type f -mtime -1 # Search files edited in the last 24 hours
+$ find . -type f -mtime -1 -delete # You can delete all the files matching a search by adding the -delete option.
+#This deletes all the files edited in the last 24 hours
+
+gzip
+# You can compress a file using the gzip compression protocol named LZ77 using the gzip command
+$ gzip filename
+$ gzip -c filename > filename.gz # This will compress the file, and append a .gz extension to it. The original
+# file is deleted. To prevent this, you can use the -c option and use output
+# redirection to write the output to the filename.gz file
+$ gzip filename1 filename2 # You can compress multiple files by listing them
+$ gzip -r a_folder # You can compress all the files in a directory, recursively, using the -r option
+# The -v option prints the compression percentage information. Here's an example of it being used along with the -k (keep) option
+
+gunzip
+# The gunzip command is basically equivalent to the gzip command, except the -d option is always enabled by default
+$ gunzip filename.gz
+$ gunzip -c filename.gz > anotherfilename # You can extract to a different filename using output redirection using the -c option
+
+tar
+# The tar command is used to create an archive, grouping multiple files in a single file
+$ tar -cf archive.tar file1 file2 # This command creates an archive named archive.tar with the content of file1 and file2
+# The c option stands for create. The f option is used to write to file the archive
+$ tar -xf archive.tar # To extract files from an archive in the current folder, the x option stands for extract
+$ tar -xf archive.tar -C directory # To extract them to a specific directory
+$ tar -czf archive.tar.gz file1 file2 # This is just like creating a tar archive, and then running gzip on it
+$ tar -xf archive.tar.gz # To unarchive a gzipped archive, you can use gunzip , or gzip -d , and then
+# unarchive it, but tar -xf will recognize it's a gzipped archive, and do it for you
+
+alias
+# It's common to always run a program with a set of options you like using
+$alias ll='ls -al'
+# You can create a new command, for example I like to call it ll , that is an alias to ls -al
+# while using the -al option it will print something more useful, including the file modification date,
+# the size, the owner, and the permissions, also listing hidden files
+# Once you do, you can call ll just like it was a regular UNIX command
+$ alias # Now calling alias without any option will list the aliases defined
+$ alias lsthis="ls $PWD"
+$ alias lscurrent='ls $PWD'
+
+cat
+# Similar to tail in some way, In its simplest usage, cat prints a file's content to the standard output
+$ cat file
+$ cat file1 file2 # You can print the content of multiple files
+$ cat file1 file2 > file3 # using the output redirection operator > you can concatenate the content of multiple files into a new file
+$ cat file1 file2 >> file3 # Using >> you can append the content of multiple files into a new file, creating it if it does not exist
+$ cat -n file1 # When watching source code files it's great to see the line numbers, and you can have cat print them using the -n option
+
+less
+# The less command is one I use a lot. It shows you the content stored inside a file, in a nice and interactive UI
+$ less <filename>
+# Once you are inside a less session, you can quit by pressing q
+# You can search contents inside the file by pressing / and typing a word to search
+
+tail
+# The best use case of tail in my opinion is when called with the -f option
+# opens the file at the end, and watches for file changes. Any time there is new content in the file, it is printed in the window
+# This is great for watching log files, for example
+$ tail -f /var/log/system.log # To exit, press ctrl-C
+$ tail -n 10 <filename> # You can print the last 10 lines in a file
+$ tail -n +10 <filename> # You can print the whole file content starting from a specific line using + before the line number
+
+wc
+# The wc command gives us useful information about a file or input it receives via pipes
+$ wc test.txt
+$ ls -al | wc # The first column returned is the number of lines. The second is the number of words. The third is the number of bytes
+
+grep
+# The grep command is a very useful tool, that when you master will help you tremendously in your day to day
+# You can use grep to search in files, or combine it with pipes to filter the output of another command
+# For example here's how we can find the occurences of the document.getElementById line in the index.md file
+$ grep document.getElementById index.md
+$ grep -n document.getElementById index.md # Using the -n option it will show the line numbers
+
