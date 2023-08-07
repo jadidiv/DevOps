@@ -1,0 +1,35 @@
+Integrate LDAP with GitLab
+--------------------------
+
+1. Edit /var/lib/docker/volumes/gitlab_config/_data/gitlab.rb
+
+gitlab_rails['ldap_enabled'] = true
+gitlab_rails['ldap_servers'] = {
+  'main' => {
+    'label' => 'LDAP',
+    'host' =>  '192.168.18.16',
+    'port' => 389,
+    'uid' => 'sAMAccountName',
+    'encryption' => 'Plain',
+    'verify_certificates' => true,
+    'bind_dn' => 'cn=ncbscore,cn=Users,dc=iranet,dc=net',
+    'password' => 'Password',
+    'active_directory' => true,
+    'allow_username_or_email_login' => false,
+    'block_auto_created_users' => false,
+    'base' => 'dc=iranet,dc=net',
+
+    # EE Only
+    'group_base' => '',
+    'admin_group' => '',
+    'external_groups' => [],
+    'sync_ssh_keys' => false
+  }
+}
+
+
+2. Save the file and reconfigure GitLab
+
+docker exec -it gitlab-web bash
+gitlab-ctl reconfigure
+

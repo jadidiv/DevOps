@@ -1,5 +1,4 @@
-# docker-compose.yml
-version: '3.7'
+version: '4.5'
 
 volumes:
   config:
@@ -8,39 +7,77 @@ volumes:
   runner:
 
 services:
-  web:
+
+  # GITLAB
+  gitlab-web:
     image: gitlab/gitlab-ce:nightly
     restart: always
-    hostname: localhost
-    container_name: gitlab-ce
+    container_name: gitlab-web
+    hostname: '192.168.12.231'
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'http://localhost'
+        external_url 'http://192.168.12.231'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2222
     ports:
-      - '8080:80'
-      - '8443:443'
+      - "8080:80"
+      - "8443:443"
+      - "2222:22"
     volumes:
       - config:/etc/gitlab
       - logs:/var/log/gitlab
       - data:/var/opt/gitlab
     networks:
-      - gitlab
-  gitlab-runner:
+      - gitlab-network
+
+  # RUNNER
+  gitlab-runner1:
     image: gitlab/gitlab-runner:alpine
-    container_name: gitlab-runner    
     restart: always
+    container_name: gitlab-runner1
+    hostname: gitlab-runner1
     depends_on:
-      - web
+      - gitlab-web
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - runner:/etc/gitlab-runner
+     - runner:/etc/gitlab-runner
+     - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - gitlab
+        - gitlab-network
 
 networks:
-  gitlab:
+  gitlab-network:
     name: gitlab-network
 
-# To log in to GitLab for the first time, you need a temporary password, which is generated automatically during installation. We get the password using the command:
+# To log in to GitLab for the first time, you need a temporary password, which is generated automatically during installation.
+# We get the password using the command:
 # http://localhost:8080/
-# docker exec -it gitlab-ce grep 'Password:' /etc/gitlab/initial_root_password
+# docker exec -it gitlab-web grep 'Password:' /etc/gitlab/initial_root_password
+
+
+#Configuring GitLab Runner
+# run gitlab-runner-register.sh
+
+#!/bin/sh
+###################################################################
+# Récuperer le token d'enregistrement du runner via ce lien:
+# http://localhost:8080/root/${project}/settings/ci_cd
+# Benoit Petit: https://github.com/benoitpetit
+###################################################################
+
+# modifier avec votre token
+
+# registration_token=XXXXXXXXXXXXXXX
+# url=http://127.0.0.1
+
+# docker exec -it gitlab-runner1 \
+#   gitlab-runner register \
+#     --non-interactive \
+#     --registration-token ${registration_token} \
+#     --locked=false \
+#     --description docker-stable \
+#     --url ${url} \
+#     --executor docker \
+#     --docker-image docker:stable \
+#     --docker-volumes "/var/run/docker.sock:/var/run/docker.sock" \
+#     --docker-network-mode gitlab-network 
+
+# executer le script pour inscrire le runner dans Gitlab
